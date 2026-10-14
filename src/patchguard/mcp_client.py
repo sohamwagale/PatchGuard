@@ -11,25 +11,29 @@ server_params = StdioServerParameters(
 async def main():
   async with stdio_client(server_params) as (read,write):
     async with ClientSession(read,write) as session:
-      await session.initialize()
+      await session.initialize() # Initialize the MCP connection
 
-      # print("here")
-      # result = await session.list_tools()
-      # for tool in result.tools:
-      #   print(tool.name)
+      tools = await session.list_tools()
 
-      # result = await session.call_tool(
-      #   "read_file",
-      #   {"path":"sample.txt"}
-      # )
+      print("Available tools: ")
+      for tool in tools.tools:
+        print(f"- {tool.name}")
 
-      result = await session.call_tool(
+      
+      file_result = await session.call_tool(
+        "read_file",
+        {"path":"sample.txt"}
+      )
+      print("\nread_file result:")
+      print(file_result.structured_content["result"])
+
+      # Test search_code.
+      search_result = await session.call_tool(
         "search_code",
         {"query": "this-thing-does-not-exist"},
       )
-
-      # print(result.content)
-      print(result.structured_content["result"]) #The above one didnt work properly
+      print("\nsearch_code result:")
+      print(search_result.structured_content["result"]) #The above one didnt work properly
 
 if __name__=="__main__":
   asyncio.run(main())
